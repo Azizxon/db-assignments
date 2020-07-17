@@ -67,7 +67,7 @@ async function task_1_3(db) {
         SELECT 
             CustomerID as 'CustomerId',
             CompanyName
-        FROM customers AS c
+        FROM Customers AS c
         WHERE c.Fax IS NULL AND c.Country = 'USA';
     `);
     return result[0];
@@ -88,7 +88,7 @@ async function task_1_4(db) {
             CAST(CustomerID AS CHAR) AS 'Customer Id',
             COUNT(OrderID) AS 'Total number of Orders',
             ROUND(CAST(COUNT(OrderID) AS DECIMAL (8 , 5 )) / (select count(CustomerID) from orders) * 100, 5) AS '% of all orders'
-        FROM orders AS o
+        FROM Orders AS o
         GROUP BY o.CustomerID
         ORDER BY 2 DESC , 1 ASC;
     `);
