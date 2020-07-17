@@ -83,7 +83,16 @@ async function task_1_3(db) {
  *
  */
 async function task_1_4(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT 
+            CAST(CustomerID AS CHAR) AS 'Customer Id',
+            COUNT(OrderID) AS 'Total number of Orders',
+            ROUND(CAST(COUNT(OrderID) AS DECIMAL (8 , 5 )) / (select count(CustomerID) from orders) * 100, 5) AS '% of all orders'
+        FROM orders AS o
+        GROUP BY o.CustomerID
+        ORDER BY 2 DESC , 1 ASC;
+    `);
+    return result[0];
 }
 
 /**
