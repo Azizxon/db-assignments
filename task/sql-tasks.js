@@ -296,7 +296,25 @@ async function task_1_14(db) {
  *
  */
 async function task_1_15(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT MAX(CASE WHEN T.Month = 'January' THEN T.TotalCount END) 'January',
+            MAX(CASE WHEN T.Month = 'February' THEN TotalCount END) 'February',
+            MAX(CASE WHEN T.Month = 'March' THEN TotalCount END) 'March',
+            MAX(CASE WHEN T.Month = 'April' THEN T.TotalCount END) 'April',
+            MAX(CASE WHEN T.Month = 'May' THEN T.TotalCount END) 'May',
+            MAX(CASE WHEN T.Month = 'June' THEN T.TotalCount END) 'June',
+            MAX(CASE WHEN T.Month = 'July' THEN T.TotalCount END) 'July',
+            MAX(CASE WHEN T.Month = 'August' THEN T.TotalCount END) 'August',
+            MAX(CASE WHEN T.Month = 'September' THEN T.TotalCount END) 'September',
+            MAX(CASE WHEN T.Month = 'October' THEN T.TotalCount END) 'October',
+            MAX(CASE WHEN T.Month = 'November' THEN T.TotalCount END) 'November',
+            MAX(CASE WHEN T.Month = 'December' THEN T.TotalCount END) 'December'
+        FROM	(SELECT COUNT(OrderID) as 'TotalCount', monthname(OrderDate) as 'Month'		
+                FROM Orders
+                WHERE YEAR(OrderDate) = 1997
+                GROUP BY monthname(OrderDate)) as T
+    `);
+    return result[0];
 }
 
 /**
