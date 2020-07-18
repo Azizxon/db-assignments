@@ -124,9 +124,9 @@ async function task_1_5(db) {
 async function task_1_6(db) {
     let result = await db.query(`
         SELECT p.ProductName, c.CategoryName, s.CompanyName as "SupplierCompanyName"
-        FROM products AS p
-        LEFT JOIN categories AS c ON c.CategoryID = p.CategoryID
-        LEFT JOIN suppliers AS s ON s.SupplierID = p.SupplierID
+        FROM Products AS p
+        LEFT JOIN Categories AS c ON c.CategoryID = p.CategoryID
+        LEFT JOIN Suppliers AS s ON s.SupplierID = p.SupplierID
         ORDER BY p.ProductName , s.CompanyName
     `);
     return result[0];
@@ -149,8 +149,8 @@ async function task_1_7(db) {
             e.EmployeeID as 'EmployeeId',
             CONCAT(e.FirstName, ' ', e.LastName) AS 'FullName',
             IFNULL(CONCAT(ee.FirstName, ' ', ee.LastName), '-') AS 'ReportsTo'
-        FROM employees e
-            LEFT JOIN employees AS ee 
+        FROM Employees e
+            LEFT JOIN Employees AS ee 
             ON e.ReportsTo = ee.EmployeeID
         ORDER BY e.EmployeeID
     `);
@@ -171,9 +171,9 @@ async function task_1_8(db) {
         FROM 
             (SELECT Count(p.ProductID) AS 'TotalNumberOfProducts',
                     p.CategoryID
-            FROM products AS p
+            FROM Products AS p
             GROUP BY p.CategoryId) AS t
-        LEFT JOIN categories AS c 
+        LEFT JOIN Categories AS c 
         ON c.CategoryID = t.CategoryID
         ORDER BY c.CategoryName
     `);
@@ -191,7 +191,7 @@ async function task_1_8(db) {
 async function task_1_9(db) {
     let result = await db.query(`
         SELECT c.CustomerID, c.ContactName
-        FROM customers AS c
+        FROM Customers AS c
         WHERE c.ContactName RLIKE '^F..n';
     `);
     return result[0];
