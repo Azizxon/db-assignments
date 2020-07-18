@@ -262,7 +262,12 @@ async function task_1_12(db) {
  *
  */
 async function task_1_13(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT 	COUNT(ProductID) AS 'TotalOfCurrentProducts',
+                SUM(CASE WHEN Discontinued = 1 THEN 1 ELSE 0 END) AS 'TotalOfDiscontinuedProducts'
+        FROM Products;
+    `);
+    return result[0];
 }
 
 /**
@@ -273,7 +278,14 @@ async function task_1_13(db) {
  *
  */
 async function task_1_14(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT	ProductName,
+                UnitsOnOrder,
+                UnitsInStock
+        FROM Products
+        where UnitsInStock < UnitsOnOrder
+    `);
+    return result[0];
 }
 
 /**
