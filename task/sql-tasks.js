@@ -392,8 +392,7 @@ async function task_1_19(db) {
                 C.CompanyName,
                 T.Total AS 'TotalOrdersAmount, $'
         FROM
-                (SELECT	O.OrderID,
-                        O.CustomerID,
+                (SELECT	O.CustomerID,
                         SUM(OD.UnitPrice * OD.Quantity) AS 'Total'
                 FROM	OrderDetails AS OD
                 LEFT JOIN Orders AS O
