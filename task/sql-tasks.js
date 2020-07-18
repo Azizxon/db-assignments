@@ -144,7 +144,17 @@ async function task_1_6(db) {
  *
  */
 async function task_1_7(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT 
+            e.EmployeeID as 'EmployeeId',
+            CONCAT(e.FirstName, ' ', e.LastName) AS 'FullName',
+            IFNULL(CONCAT(ee.FirstName, ' ', ee.LastName), '-') AS 'ReportsTo'
+        FROM employees e
+            LEFT JOIN employees AS ee 
+            ON e.ReportsTo = ee.EmployeeID
+        ORDER BY e.EmployeeID
+    `);
+    return result[0];
 }
 
 /**
