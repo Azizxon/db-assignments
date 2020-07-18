@@ -1,6 +1,4 @@
 language: node_js
-services:
-  - mysql #travis provides the service with mysql 5.7 on july 2020
 before_install:
   - wget https://repo.mysql.com//mysql-apt-config_0.8.10-1_all.deb
   - sudo dpkg -i mysql-apt-config_0.8.10-1_all.deb
