@@ -166,7 +166,18 @@ async function task_1_7(db) {
  *
  */
 async function task_1_8(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT c.CategoryName, t.TotalNumberOfProducts
+        FROM 
+            (SELECT Count(p.ProductID) AS 'TotalNumberOfProducts',
+                    p.CategoryID
+            FROM products AS p
+            GROUP BY p.CategoryId) AS t
+        LEFT JOIN categories AS c 
+        ON c.CategoryID = t.CategoryID
+        ORDER BY c.CategoryName
+    `);
+    return result[0];
 }
 
 /**
