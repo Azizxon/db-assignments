@@ -388,8 +388,8 @@ async function task_1_18(db) {
  */
 async function task_1_19(db) {
     let result = await db.query(`
-        SELECT	c.CustomerID,
-                c.CompanyName,
+        SELECT	C.CustomerID,
+                C.CompanyName,
                 T.Total AS 'TotalOrdersAmount, $'
         FROM
                 (SELECT OD.OrderID,
@@ -415,7 +415,22 @@ async function task_1_19(db) {
  *
  */
 async function task_1_20(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT	E.EmployeeID,
+            CONCAT(E.FirstName, ' ', E.LastName) AS 'Employee Full Name',
+            T.Total AS 'Amount, $'
+        FROM	Employees AS E
+        RIGHT JOIN
+            (SELECT	O.EmployeeID,
+                    SUM(OD.UnitPrice * OD.Quantity) AS 'Total'
+            FROM	OrderDetails AS OD
+            LEFT JOIN Orders AS O
+            ON O.OrderID = OD.OrderID
+            GROUP BY O.EmployeeID) AS T
+        ON T.EmployeeID = E.EmployeeID
+        ORDER BY T.Total DESC LIMIT 1;
+    `);
+    return result[0];
 }
 
 /**
