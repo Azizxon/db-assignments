@@ -43,16 +43,7 @@ async function task_1_1(db) {
  *
  */
 async function task_1_2(db) {
-    let result = await db.query(`
-        SELECT 
-            CAST(OrderID AS CHAR) AS 'Order Id',
-            CAST(SUM(UnitPrice * Quantity) AS CHAR) AS 'Order Total Price',
-            (CAST((ROUND(SUM(Discount * Quantity) * 100 / SUM(UnitPrice * Quantity), 3)) AS CHAR) + 0) AS 'Total Order Discount, %'
-        FROM OrderDetails
-        GROUP BY OrderID
-        ORDER BY OrderID DESC;
-    `);
-    return result[0];
+    throw new Error("Not implemented");
 }
 
 /**
