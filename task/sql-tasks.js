@@ -368,11 +368,12 @@ async function task_1_17(db) {
  */
 async function task_1_18(db) {
     let result = await db.query(`
-        SELECT		DATE_FORMAT(OrderDate, '%Y-%m-%d %T') AS 'OrderDate',
-            COUNT(DAY(OrderDate)) AS 'Total Number of Orders'
-        FROM	Orders
-        WHERE	YEAR(OrderDate) = 1998
-        GROUP BY DAY(OrderDate), MONTH(OrderDate) , YEAR(OrderDate)
+        SELECT	T.OrderDate, COUNT(*) AS 'Total Number of Orders'
+        FROM
+            (SELECT	DATE_FORMAT(OrderDate, '%Y-%m-%d %T') AS 'OrderDate'
+            FROM	Orders
+            WHERE	YEAR(OrderDate) = 1998) AS T
+        GROUP BY T.OrderDate
     `);
     return result[0];
 }
