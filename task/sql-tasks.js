@@ -223,7 +223,13 @@ async function task_1_10(db) {
  *
  */
 async function task_1_11(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT p.ProductName, cast(p.UnitPrice as signed) as 'UnitPrice'
+        FROM Products AS p
+        WHERE p.UnitPrice>=5 and p.UnitPrice<=15	
+        order by p.UnitPrice, p.ProductName
+    `);
+    return result[0];
 }
 
 /**
