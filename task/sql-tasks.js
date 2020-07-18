@@ -325,7 +325,12 @@ async function task_1_15(db) {
  *
  */
 async function task_1_16(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT OrderID, CustomerID, ShipCountry
+        FROM Orders
+        WHERE orders.ShipPostalCode IS NOT NULL
+    `);
+    return result[0];
 }
 
 /**
@@ -338,7 +343,19 @@ async function task_1_16(db) {
  *
  */
 async function task_1_17(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT	C.CategoryName,
+                CAST(T.AvgPrice AS DECIMAL (8 , 4 )) AS 'AvgPrice'
+        FROM
+                (SELECT CategoryID, 
+                        AVG(UnitPrice) AS 'AvgPrice'
+                FROM Products
+                GROUP BY CategoryID) AS T
+        LEFT JOIN Categories AS C 
+        ON C.CategoryID = T.CategoryID
+        ORDER BY T.AvgPrice DESC , C.CategoryName
+    `);
+    return result[0];
 }
 
 /**
