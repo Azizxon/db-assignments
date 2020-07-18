@@ -106,6 +106,7 @@ async function task_1_5(db) {
     let result = await db.query(`
         SELECT ProductID AS 'ProductId', ProductName, QuantityPerUnit
         FROM Products AS p
+        WHERE p.ProductName REGEXP '^[a-f]'
         ORDER BY p.ProductName
     `);
     return result[0];
