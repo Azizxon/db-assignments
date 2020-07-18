@@ -387,7 +387,23 @@ async function task_1_18(db) {
  *
  */
 async function task_1_19(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT	c.CustomerID,
+                c.CompanyName,
+                T.Total AS 'TotalOrdersAmount, $'
+        FROM
+                (SELECT OD.OrderID,
+                        O.CustomerID,
+                        SUM(OD.UnitPrice * OD.Quantity) AS 'Total'
+                FROM	OrderDetails AS OD
+                LEFT JOIN Orders AS O ON O.OrderID = OD.OrderID
+                GROUP BY O.CustomerID) AS T
+        LEFT JOIN Customers AS C 
+        ON C.CustomerID = T.CustomerID
+        WHERE	T.Total > 10000
+        ORDER BY 3 DESC , C.CustomerID
+    `);
+    return result[0];
 }
 
 /**
