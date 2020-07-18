@@ -247,7 +247,7 @@ async function task_1_12(db) {
         FROM
             (SELECT p.ProductName, p.UnitPrice
             FROM Products AS p
-            ORDER BY P.UnitPrice DESC
+            ORDER BY p.UnitPrice DESC
             LIMIT 20) AS t
         ORDER BY t.UnitPrice, t.ProductName
     `);
@@ -328,7 +328,7 @@ async function task_1_16(db) {
     let result = await db.query(`
         SELECT OrderID, CustomerID, ShipCountry
         FROM Orders
-        WHERE orders.ShipPostalCode IS NOT NULL
+        WHERE Orders.ShipPostalCode IS NOT NULL
     `);
     return result[0];
 }
@@ -369,7 +369,7 @@ async function task_1_17(db) {
 async function task_1_18(db) {
     let result = await db.query(`
         SELECT	DATE_FORMAT(OrderDate, '%Y-%m-%d %T') AS 'OrderDate',
-            COUNT(OrderID) AS 'Total Number of Orders'
+            COUNT(*) AS 'Total Number of Orders'
         FROM	Orders
         WHERE	YEAR(OrderDate) = 1998
         GROUP BY DAY(OrderDate), MONTH(OrderDate) , YEAR(OrderDate)
