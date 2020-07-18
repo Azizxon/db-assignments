@@ -224,10 +224,10 @@ async function task_1_10(db) {
  */
 async function task_1_11(db) {
     let result = await db.query(`
-        SELECT p.ProductName, cast(p.UnitPrice as signed) as 'UnitPrice'
+        SELECT p.ProductName, CAST(p.UnitPrice as signed) as 'UnitPrice'
         FROM Products AS p
-        WHERE p.UnitPrice>=5 and p.UnitPrice<=15	
-        order by p.UnitPrice, p.ProductName
+        WHERE p.UnitPrice>=5 AND p.UnitPrice<=15	
+        ORDER BY p.UnitPrice, p.ProductName
     `);
     return result[0];
 }
@@ -242,7 +242,16 @@ async function task_1_11(db) {
  *
  */
 async function task_1_12(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT *
+        FROM
+            (SELECT p.ProductName, p.UnitPrice
+            FROM Products AS p
+            ORDER BY P.UnitPrice DESC
+            LIMIT 20) AS t
+        ORDER BY t.UnitPrice, t.ProductName
+    `);
+    return result[0];
 }
 
 /**
