@@ -122,7 +122,14 @@ async function task_1_5(db) {
  *
  */
 async function task_1_6(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT p.ProductName, c.CategoryName, s.CompanyName as "SupplierCompanyName"
+        FROM products AS p
+        LEFT JOIN categories AS c ON c.CategoryID = p.CategoryID
+        LEFT JOIN suppliers AS s ON s.SupplierID = p.SupplierID
+        ORDER BY p.ProductName , s.CompanyName
+    `);
+    return result[0];
 }
 
 /**
