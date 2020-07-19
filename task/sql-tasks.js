@@ -440,7 +440,14 @@ async function task_1_20(db) {
  * @return {array}
  */
 async function task_1_21(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        SELECT	OrderID,
+                SUM(UnitPrice * Quantity) AS 'Maximum Purchase Amount, $'
+        FROM	OrderDetails
+        GROUP BY OrderID
+        ORDER BY 2 DESC LIMIT 1
+    `);
+    return result[0];
 }
 
 /**
@@ -451,7 +458,31 @@ async function task_1_21(db) {
  * @return {array}
  */
 async function task_1_22(db) {
-    throw new Error("Not implemented");
+    let result = await db.query(`
+        WITH CTE AS 
+        (SELECT	OD.ProductID, O.CustomerID, OD.UnitPrice 
+        FROM	Orders AS O 
+        INNER JOIN OrderDetails AS OD 
+        ON O.OrderID = OD.OrderID) 
+        
+        SELECT L.CompanyName, L.ProductName, L.PricePerItem
+        FROM
+            (SELECT *,  ROW_NUMBER()
+                        OVER (PARTITION BY  K.CompanyName, K.ProductName, K.PricePerItem) as ROW_NUM
+            FROM	(SELECT C.CompanyName,	D.ProductName, CAST(D.UnitPrice as SIGNED) AS 'PricePerItem'
+                    FROM	Customers AS C 
+                    RIGHT JOIN (SELECT P.ProductName, T.* 
+                                FROM   Products AS P
+                                RIGHT JOIN (SELECT T1.ProductID, T1.CustomerID, T1.UnitPrice 
+                                            FROM   CTE AS T1 
+                                            WHERE  T1.UnitPrice = 
+                                            (SELECT Max(T2.UnitPrice) FROM CTE AS T2 WHERE T1.CustomerID = T2.CustomerID)) AS T 
+                                ON T.ProductID = P.ProductID) AS D
+                    ON C.CustomerID = D.CustomerID) AS K) as L
+        WHERE L.ROW_NUM = 1
+        ORDER BY L.PricePerItem desc, L.CompanyName, L.ProductName
+    `);
+    return result[0];
 }
 
 module.exports = {
