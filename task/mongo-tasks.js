@@ -375,7 +375,22 @@ async function task_1_8(db) {
  * order by CustomerID
  */
 async function task_1_9(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('customers').aggregate([
+        {
+          '$match': {
+            'ContactName': {
+              '$regex': new RegExp('^F..n')
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'CustomerID': 1, 
+            'ContactName': 1
+          }
+        }
+      ]).toArray();
+      return result;
 }
 
 /**
