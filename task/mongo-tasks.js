@@ -201,7 +201,27 @@ async function task_1_4(db) {
  * | ProductID | ProductName | QuantityPerUnit |
  */
 async function task_1_5(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('products').aggregate([
+            {
+              '$match': {
+                'ProductName': {
+                  '$regex': new RegExp('^[a-f]', 'i')
+                }
+              }
+            }, {
+              '$project': {
+                '_id': 0, 
+                'ProductID': 1, 
+                'ProductName': 1, 
+                'QuantityPerUnit': 1
+              }
+            }, {
+              '$sort': {
+                'ProductName': 1
+              }
+            }
+    ]).toArray();
+    return result;
 }
 
 /**
