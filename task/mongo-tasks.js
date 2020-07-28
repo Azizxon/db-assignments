@@ -158,7 +158,42 @@ async function task_1_3(db) {
  *
  */
 async function task_1_4(db) {
-    throw new Error("Not implemented");
+    let totalCount = await db.collection('orders').count();
+    let result = await db.collection('orders').aggregate([
+        {
+          '$group': {
+            '_id': '$CustomerID', 
+            'TotalNumberOfOrders': {
+              '$sum': 1
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'Customer Id': '$_id', 
+            'Total number of Orders': '$TotalNumberOfOrders', 
+            '% of all orders': {
+              '$round': [
+                {
+                  '$divide': [
+                    {
+                      '$multiply': [
+                        '$TotalNumberOfOrders', 100
+                      ]
+                    }, totalCount
+                  ]
+                }, 3
+              ]
+            }
+          }
+        }, {
+          '$sort': {
+            'Total number of Orders': -1, 
+            'Customer Id': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
