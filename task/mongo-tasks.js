@@ -235,7 +235,45 @@ async function task_1_5(db) {
  *       https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/
  */
 async function task_1_6(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('products').aggregate([
+        {
+            '$lookup': {
+            'from': 'categories', 
+            'localField': 'CategoryID', 
+            'foreignField': 'CategoryID', 
+            'as': 'T1'
+            }
+        }, {
+            '$unwind': {
+            'path': '$T1'
+            }
+        }, {
+            '$lookup': {
+            'from': 'suppliers', 
+            'localField': 'SupplierID', 
+            'foreignField': 'SupplierID', 
+            'as': 'T2'
+            }
+        }, {
+            '$unwind': {
+            'path': '$T2'
+            }
+        }, {
+            '$project': {
+            '_id': 0, 
+            'ProductName': 1, 
+            'CategoryName': '$T1.CategoryName', 
+            'SupplierCompanyName': '$T2.CompanyName'
+            }
+        }, {
+            '$sort': {
+            'ProductName': 1, 
+            'CategoryName': 1
+            }
+        }
+    ]).toArray();
+
+    return result;
 }
 
 /**
