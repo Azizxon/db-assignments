@@ -125,7 +125,26 @@ async function task_1_2(db) {
  * HINT: check by string "NULL" values
  */
 async function task_1_3(db) {
-    throw new Error("Not implemented");
+    const result = await db.collection('customers').aggregate([
+        {
+          '$match': {
+            'Fax': {
+              '$eq': 'NULL'
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'CustomerID': '$CustomerID', 
+            'CompanyName': '$CompanyName'
+          }
+        }, {
+          '$sort': {
+            'CustomerID': 1
+          }
+        }
+      ]).toArray();
+    return result;
 }
 
 /**
