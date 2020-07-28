@@ -225,7 +225,7 @@ async function task_1_11(db) {
     let result = await db.query(`
         SELECT p.ProductName, CAST(p.UnitPrice as signed) as 'UnitPrice'
         FROM Products AS p
-        WHERE p.UnitPrice>=5 AND p.UnitPrice<=15	
+        WHERE UnitPrice BETWEEN 5 AND 15	
         ORDER BY p.UnitPrice, p.ProductName
     `);
     return result[0];
@@ -296,22 +296,21 @@ async function task_1_14(db) {
  */
 async function task_1_15(db) {
     let result = await db.query(`
-        SELECT MAX(CASE WHEN T.Month = 'January' THEN T.TotalCount END) 'January',
-            MAX(CASE WHEN T.Month = 'February' THEN TotalCount END) 'February',
-            MAX(CASE WHEN T.Month = 'March' THEN TotalCount END) 'March',
-            MAX(CASE WHEN T.Month = 'April' THEN T.TotalCount END) 'April',
-            MAX(CASE WHEN T.Month = 'May' THEN T.TotalCount END) 'May',
-            MAX(CASE WHEN T.Month = 'June' THEN T.TotalCount END) 'June',
-            MAX(CASE WHEN T.Month = 'July' THEN T.TotalCount END) 'July',
-            MAX(CASE WHEN T.Month = 'August' THEN T.TotalCount END) 'August',
-            MAX(CASE WHEN T.Month = 'September' THEN T.TotalCount END) 'September',
-            MAX(CASE WHEN T.Month = 'October' THEN T.TotalCount END) 'October',
-            MAX(CASE WHEN T.Month = 'November' THEN T.TotalCount END) 'November',
-            MAX(CASE WHEN T.Month = 'December' THEN T.TotalCount END) 'December'
-        FROM	(SELECT COUNT(OrderID) as 'TotalCount', monthname(OrderDate) as 'Month'		
-                FROM Orders
-                WHERE YEAR(OrderDate) = 1997
-                GROUP BY monthname(OrderDate)) as T
+        SELECT 
+            SUM(MONTH(OrderDate) = 1) AS January,
+            SUM(MONTH(OrderDate) = 2) AS February,
+            SUM(MONTH(OrderDate) = 3) AS March,
+            SUM(MONTH(OrderDate) = 4) AS April,
+            SUM(MONTH(OrderDate) = 5) AS May,
+            SUM(MONTH(OrderDate) = 6) AS June,
+            SUM(MONTH(OrderDate) = 7) AS July,
+            SUM(MONTH(OrderDate) = 8) AS August,
+            SUM(MONTH(OrderDate) = 9) AS September,
+            SUM(MONTH(OrderDate) = 10) AS October,
+            SUM(MONTH(OrderDate) = 11) AS November,
+            SUM(MONTH(OrderDate) = 12) AS December
+        FROM Orders
+        WHERE YEAR(OrderDate) = 1997
     `);
     return result[0];
 }
@@ -367,12 +366,11 @@ async function task_1_17(db) {
  */
 async function task_1_18(db) {
     let result = await db.query(`
-        SELECT	T.OrderDate, COUNT(*) AS 'Total Number of Orders'
-        FROM
-            (SELECT	DATE_FORMAT(OrderDate, '%Y-%m-%d %T') AS 'OrderDate'
-            FROM	Orders
-            WHERE	YEAR(OrderDate) = 1998) AS T
-        GROUP BY T.OrderDate
+        SELECT	DATE_FORMAT(O.OrderDate, '%Y-%m-%d %T') as "OrderDate", 
+                COUNT(*) AS 'Total Number of Orders'
+        FROM Orders as O
+        GROUP BY O.OrderDate
+        HAVING YEAR(O.OrderDate) = 1998
     `);
     return result[0];
 }
