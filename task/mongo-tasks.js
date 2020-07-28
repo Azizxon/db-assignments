@@ -399,7 +399,20 @@ async function task_1_9(db) {
  * order by ProductID
  */
 async function task_1_10(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('products').aggregate([
+        {
+          '$match': {
+            'Discontinued': 1
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'ProductID': 1, 
+            'ProductName': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
