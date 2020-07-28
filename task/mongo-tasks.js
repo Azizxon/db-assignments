@@ -286,7 +286,45 @@ async function task_1_6(db) {
  * Reports To - Full name. If the employee does not report to anybody leave "-" in the column.
  */
 async function task_1_7(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('employees').aggregate([
+        {
+          '$lookup': {
+            'from': 'employees', 
+            'localField': 'ReportsTo', 
+            'foreignField': 'EmployeeID', 
+            'as': 'T1'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T1', 
+            'preserveNullAndEmptyArrays': true
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'EmployeeID': 1, 
+            'FullName': {
+              '$concat': [
+                '$TitleOfCourtesy', '$FirstName', ' ', '$LastName'
+              ]
+            }, 
+            'ReportsTo': {
+              '$ifNull': [
+                {
+                  '$concat': [
+                    '$T1.FirstName', ' ', '$T1.LastName'
+                  ]
+                }, '-'
+              ]
+            }
+          }
+        }, {
+          '$sort': {
+            'EmployeeID': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
