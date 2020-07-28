@@ -334,7 +334,38 @@ async function task_1_7(db) {
  * Order by CategoryName
  */
 async function task_1_8(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('products').aggregate([
+        {
+          '$group': {
+            '_id': '$CategoryID', 
+            'TotalNumberOfProducts': {
+              '$sum': 1
+            }
+          }
+        }, {
+          '$lookup': {
+            'from': 'categories', 
+            'localField': '_id', 
+            'foreignField': 'CategoryID', 
+            'as': 'T1'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T1'
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'CategoryName': '$T1.CategoryName', 
+            'TotalNumberOfProducts': 1
+          }
+        }, {
+          '$sort': {
+            'CategoryName': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
