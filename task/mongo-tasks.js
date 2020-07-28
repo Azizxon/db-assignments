@@ -484,7 +484,28 @@ async function task_1_12(db) {
  * HINT: That's acceptable to make it in 2 queries
  */
 async function task_1_13(db) {
-    throw new Error("Not implemented");
+    let totalCount = await db.collection('products').count();
+    let result = await db.collection('products').aggregate([
+        {
+          '$match': {
+            'Discontinued': 1
+          }
+        }, {
+          '$count': 'TotalOfDiscontinuedProducts'
+        }, {
+          '$project': {
+            '_id': 0, 
+            'TotalOfDiscontinuedProducts': 1, 
+            'TotalOfCurrentProducts': {
+              '$multiply': [
+                totalCount, 1
+              ]
+            }
+          }
+        }
+    ]).toArray();
+
+    return result[0];
 }
 
 /**
