@@ -890,7 +890,76 @@ async function task_1_19(db) {
  * | EmployeeID | Employee Full Name | Amount, $ |
  */
 async function task_1_20(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('employees').aggregate([
+        {
+          '$project': {
+            '_id': 0, 
+            'EmployeeID': 1, 
+            'FirstName': 1, 
+            'LastName': 1
+          }
+        }, {
+          '$lookup': {
+            'from': 'orders', 
+            'localField': 'EmployeeID', 
+            'foreignField': 'EmployeeID', 
+            'as': 'T1'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T1'
+          }
+        }, {
+          '$project': {
+            'EmployeeID': 1, 
+            'Employee Full Name': {
+              '$concat': [
+                '$FirstName', ' ', '$LastName'
+              ]
+            }, 
+            'OrderID': '$T1.OrderID'
+          }
+        }, {
+          '$lookup': {
+            'from': 'order-details', 
+            'localField': 'OrderID', 
+            'foreignField': 'OrderID', 
+            'as': 'T2'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T2'
+          }
+        }, {
+          '$group': {
+            '_id': '$EmployeeID', 
+            'Employee Full Name': {
+              '$first': '$Employee Full Name'
+            }, 
+            'Amount, $': {
+              '$sum': {
+                '$multiply': [
+                  '$T2.UnitPrice', '$T2.Quantity'
+                ]
+              }
+            }
+          }
+        }, {
+          '$sort': {
+            'Amount, $': -1
+          }
+        }, {
+          '$limit': 1
+        }, {
+          '$project': {
+            '_id': 0, 
+            'EmployeeID': '$_id', 
+            'Amount, $': 1, 
+            'Employee Full Name': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
