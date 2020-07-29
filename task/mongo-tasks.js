@@ -21,7 +21,15 @@
  * Test timeout is increased to 15sec for the function.
  * */
 async function before(db) {
-    await db.collection('employees').ensureIndex({CustomerID: 1});
+    await db.collection('employees').createIndex({CustomerID: 1});
+    await db.collection('orders').createIndex({OrderID: 1});
+    await db.collection('orders').createIndex({CustomerID: 1});
+    await db.collection('order-details').createIndex({OrderID: 1});
+    await db.collection('order-details').createIndex({ProductID: 1});
+    await db.collection('products').createIndex({ProductID: 1});
+    await db.collection('products').createIndex({SupplierID: 1});
+    await db.collection('products').createIndex({CategoryID: 1});
+    await db.collection('customers').createIndex({CustomerID: 1});    
 }
 
 /**
@@ -147,7 +155,7 @@ async function task_1_3(db) {
  *
  */
 async function task_1_4(db) {
-    let totalCount = await db.collection('orders').count();
+    let totalCount = await db.collection('orders').countDocuments();
     let result = await db.collection('orders').aggregate([
         {
           '$group': {
@@ -473,7 +481,7 @@ async function task_1_12(db) {
  * HINT: That's acceptable to make it in 2 queries
  */
 async function task_1_13(db) {
-    let totalCount = await db.collection('products').count();
+    let totalCount = await db.collection('products').countDocuments();
     let result = await db.collection('products').aggregate([
         {
           '$match': {
