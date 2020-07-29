@@ -646,8 +646,8 @@ async function task_1_15(db) {
             '_id': 0
           }
         }
-    ]).toArray();
-    return result[0];
+    ]).next();
+    return result;
 }
 
 /**
