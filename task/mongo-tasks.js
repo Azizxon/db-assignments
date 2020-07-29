@@ -671,7 +671,23 @@ async function task_1_15(db) {
  * Order by OrderID
  */
 async function task_1_16(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('orders').aggregate([
+        {
+          '$match': {
+            'ShipPostalCode': {
+              '$ne': null
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'OrderID': 1, 
+            'CustomerID': 1, 
+            'ShipCountry': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
