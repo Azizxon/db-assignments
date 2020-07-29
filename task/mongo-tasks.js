@@ -551,7 +551,118 @@ async function task_1_14(db) {
  *       https://docs.mongodb.com/manual/reference/operator/aggregation/dateFromString/
  */
 async function task_1_15(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('orders').aggregate([
+        {
+          '$project': {
+            'OrderDate': {
+              '$dateFromString': {
+                'dateString': '$OrderDate'
+              }
+            }
+          }
+        }, {
+          '$group': {
+            '_id': {
+              '$month': '$OrderDate'
+            }, 
+            'count': {
+              '$sum': {
+                '$cond': {
+                  'if': {
+                    '$eq': [
+                      {
+                        '$year': '$OrderDate'
+                      }, 1997
+                    ]
+                  }, 
+                  'then': 1, 
+                  'else': 0
+                }
+              }
+            }
+          }
+        }, {
+          '$project': {
+            '_id': '1', 
+            'count': 1, 
+            'month': {
+              '$let': {
+                'vars': {
+                  'monthString': [
+                    '', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+                  ]
+                }, 
+                'in': {
+                  '$arrayElemAt': [
+                    '$$monthString', '$_id'
+                  ]
+                }
+              }
+            }
+          }
+        }, {
+          '$replaceRoot': {
+            'newRoot': {
+              '$arrayToObject': [
+                [
+                  {
+                    'k': '$month', 
+                    'v': '$count'
+                  }, {
+                    'k': '_id', 
+                    'v': '-1'
+                  }
+                ]
+              ]
+            }
+          }
+        }, {
+          '$group': {
+            '_id': '$_id', 
+            'January': {
+              '$max': '$January'
+            }, 
+            'February': {
+              '$max': '$February'
+            }, 
+            'March': {
+              '$max': '$March'
+            }, 
+            'April': {
+              '$max': '$April'
+            }, 
+            'May': {
+              '$max': '$May'
+            }, 
+            'June': {
+              '$max': '$June'
+            }, 
+            'July': {
+              '$max': '$July'
+            }, 
+            'August': {
+              '$max': '$August'
+            }, 
+            'September': {
+              '$max': '$September'
+            }, 
+            'October': {
+              '$max': '$October'
+            }, 
+            'November': {
+              '$max': '$November'
+            }, 
+            'December': {
+              '$max': '$December'
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 0
+          }
+        }
+    ]).toArray();
+    return result[0];
 }
 
 /**
