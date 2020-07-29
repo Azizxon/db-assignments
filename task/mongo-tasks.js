@@ -56,66 +56,55 @@ async function task_1_1(db) {
  *  - Round all values to MAX 3 decimal places
  */
 async function task_1_2(db) {
-    const result = await db.collection('orders').aggregate([
-        {
-            '$lookup': {
-            'from': 'order-details', 
-            'localField': 'OrderID', 
-            'foreignField': 'OrderID', 
-            'as': 'OD'
+    const result = await db.collection('order-details').aggregate([
+      {
+        '$group': {
+          '_id': '$OrderID', 
+          'TotalPrice': {
+            '$sum': {
+              '$multiply': [
+                '$UnitPrice', '$Quantity'
+              ]
             }
-        }, {
-            '$unwind': {
-            'path': '$OD'
+          }, 
+          'TotalDiscount': {
+            '$sum': {
+              '$multiply': [
+                '$Discount', '$Quantity'
+              ]
             }
-        }, {
-            '$group': {
-            '_id': '$OrderID', 
-            'TotalPrice': {
-                '$sum': {
-                '$multiply': [
-                    '$OD.UnitPrice', '$OD.Quantity'
-                ]
-                }
-            }, 
-            'TotalDiscount': {
-                '$sum': {
-                '$multiply': [
-                    '$OD.Discount', '$OD.Quantity'
-                ]
-                }
-            }
-            }
-        }, {
-            '$project': {
-            '_id': 0, 
-            'Order Id': '$_id', 
-            'Order Total Price': {
-                '$round': [
-                '$TotalPrice', 3
-                ]
-            }, 
-            'Total Order Discount, %': {
-                '$round': [
-                {
-                    '$multiply': [
-                    {
-                        '$divide': [
-                        '$TotalDiscount', '$TotalPrice'
-                        ]
-                    }, 100
-                    ]
-                }, 3
-                ]
-            }
-            }
-        }, {
-            '$sort': {
-            'Order Id': -1
-            }
+          }
         }
-    ]).toArray();
-    return result;
+      }, {
+        '$project': {
+          '_id': 0, 
+          'Order Id': '$_id', 
+          'Order Total Price': {
+            '$round': [
+              '$TotalPrice', 3
+            ]
+          }, 
+          'Total Order Discount, %': {
+            '$round': [
+              {
+                '$multiply': [
+                  {
+                    '$divide': [
+                      '$TotalDiscount', '$TotalPrice'
+                    ]
+                  }, 100
+                ]
+              }, 3
+            ]
+          }
+        }
+      }, {
+        '$sort': {
+          'Order Id': -1
+        }
+      }
+  ]).toArray();
+  return result;
 }
 
 /**
@@ -496,16 +485,12 @@ async function task_1_13(db) {
           '$project': {
             '_id': 0, 
             'TotalOfDiscontinuedProducts': 1, 
-            'TotalOfCurrentProducts': {
-              '$multiply': [
-                totalCount, 1
-              ]
-            }
+            'TotalOfCurrentProducts': {$toInt: totalCount}
           }
         }
-    ]).toArray();
+    ]).next();
 
-    return result[0];
+    return result;
 }
 
 /**
