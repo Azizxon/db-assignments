@@ -967,7 +967,33 @@ async function task_1_20(db) {
  * | OrderID | Maximum Purchase Amount, $ |
  */
 async function task_1_21(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('order-details').aggregate([
+        {
+          '$group': {
+            '_id': '$OrderID', 
+            'Maximum Purchase Amount, $': {
+              '$sum': {
+                '$multiply': [
+                  '$UnitPrice', '$Quantity'
+                ]
+              }
+            }
+          }
+        }, {
+          '$sort': {
+            'Maximum Purchase Amount, $': -1
+          }
+        }, {
+          '$limit': 1
+        }, {
+          '$project': {
+            '_id': 0, 
+            'OrderID': '$_id', 
+            'Maximum Purchase Amount, $': 1
+          }
+        }
+    ]).toArray();
+    return result;
 }
 
 /**
@@ -980,7 +1006,87 @@ async function task_1_21(db) {
  *       https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/#join-conditions-and-uncorrelated-sub-queries
  */
 async function task_1_22(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('orders').aggregate([
+        {
+          '$lookup': {
+            'from': 'order-details', 
+            'localField': 'OrderID', 
+            'foreignField': 'OrderID', 
+            'as': 'T1'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T1'
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'CustomerID': 1, 
+            'PricePerItem': '$T1.UnitPrice', 
+            'ProductID': '$T1.ProductID'
+          }
+        }, {
+          '$sort': {
+            'PricePerItem': -1
+          }
+        }, {
+          '$group': {
+            '_id': '$CustomerID', 
+            'ProductID': {
+              '$first': '$ProductID'
+            }, 
+            'PricePerItem': {
+              '$max': '$PricePerItem'
+            }
+          }
+        }, {
+          '$lookup': {
+            'from': 'customers', 
+            'localField': '_id', 
+            'foreignField': 'CustomerID', 
+            'as': 'T2'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T2'
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'CustomerID': '$_id', 
+            'ProductID': 1, 
+            'PricePerItem': 1, 
+            'CustomerID': '$T2.CustomerID', 
+            'CompanyName': '$T2.CompanyName'
+          }
+        }, {
+          '$lookup': {
+            'from': 'products', 
+            'localField': 'ProductID', 
+            'foreignField': 'ProductID', 
+            'as': 'T3'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T3'
+          }
+        }, {
+          '$project': {
+            'CustomerID': 1, 
+            'PricePerItem': 1, 
+            'CompanyName': 1, 
+            'ProductName': '$T3.ProductName'
+          }
+        }, {
+          '$sort': {
+            'PricePerItem': -1, 
+            'CompanyName': 1, 
+            'ProductName': 1
+          }
+        }
+      ]).toArray();
+
+    return result;
 }
 
 module.exports = {
