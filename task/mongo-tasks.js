@@ -813,7 +813,75 @@ async function task_1_18(db) {
  *       - do not hesitate to "ensureIndex" in "before" function at the top if needed https://docs.mongodb.com/manual/reference/method/db.collection.ensureIndex/
  */
 async function task_1_19(db) {
-    throw new Error("Not implemented");
+    let result = await db.collection('orders').aggregate([
+        {
+          '$project': {
+            '_id': 0,
+            'CustomerID': 1, 
+            'OrderID': 1
+          }
+        }, {
+          '$lookup': {
+            'from': 'order-details', 
+            'localField': 'OrderID', 
+            'foreignField': 'OrderID', 
+            'as': 'T1'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T1'
+          }
+        }, {
+          '$group': {
+            '_id': '$CustomerID', 
+            'total': {
+              '$sum': {
+                '$multiply': [
+                  {
+                    '$subtract': [
+                      '$T1.UnitPrice', 0
+                    ]
+                  }, '$T1.Quantity'
+                ]
+              }
+            }
+          }
+        }, {
+          '$match': {
+            'total': {
+              '$gt': 10000
+            }
+          }
+        }, {
+          '$lookup': {
+            'from': 'customers', 
+            'localField': '_id', 
+            'foreignField': 'CustomerID', 
+            'as': 'T2'
+          }
+        }, {
+          '$unwind': {
+            'path': '$T2'
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'CustomerID': '$_id', 
+            'CompanyName': '$T2.CompanyName', 
+            'TotalOrdersAmount, $': {
+              '$round': [
+                '$total', 2
+              ]
+            }
+          }
+        }, {
+          '$sort': {
+            'TotalOrdersAmount, $': -1, 
+            'CustomerID': 1
+          }
+        }
+      ]).toArray();
+    return result;
 }
 
 /**
