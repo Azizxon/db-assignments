@@ -744,48 +744,52 @@ async function task_1_17(db) {
  */
 async function task_1_18(db) {
     let result = await db.collection('orders').aggregate([
-        {
-          '$project': {
-            '_id': 0, 
-            'OrderDate': {
-              '$dateFromString': {
-                'dateString': '$OrderDate'
-              }
+      {
+        '$project': {
+          '_id': 0, 
+          'OrderDate': {
+            '$dateFromString': {
+              'dateString': '$OrderDate'
             }
-          }
-        }, {
-          '$match': {
-            '$expr': {
-              '$eq': [
-                {
-                  '$year': '$OrderDate'
-                }, 1998
-              ]
-            }
-          }
-        }, {
-          '$group': {
-            '_id': {
-              '$dateToString': {
-                'date': '$OrderDate', 
-                'format': '%Y-%m-%d'
-              }
-            }, 
-            'Total Number of Orders': {
-              '$sum': 1
-            }
-          }
-        }, {
-          '$project': {
-            '_id': 0, 
-            'Order Date': '$_id', 
-            'Total Number of Orders': 1
-          }
-        }, {
-          '$sort': {
-            'Order Date': 1
           }
         }
+      }, {
+        '$match': {
+          '$and': [
+            {
+              'OrderDate': {
+                '$gte': new Date('Thu, 01 Jan 1998 00:00:00 GMT')
+              }
+            }, {
+              'OrderDate': {
+                '$lte': new Date('Thu, 31 Dec 1998 00:00:00 GMT')
+              }
+            }
+          ]
+        }
+      }, {
+        '$group': {
+          '_id': {
+            '$dateToString': {
+              'date': '$OrderDate', 
+              'format': '%Y-%m-%d'
+            }
+          }, 
+          'Total Number of Orders': {
+            '$sum': 1
+          }
+        }
+      }, {
+        '$project': {
+          '_id': 0, 
+          'Order Date': '$_id', 
+          'Total Number of Orders': 1
+        }
+      }, {
+        '$sort': {
+          'Order Date': 1
+        }
+      }
     ]).toArray();
     return result;
 }
